@@ -6,31 +6,33 @@
 const nodemailer = require('nodemailer');
 
 // Email configuration settings
+// Gmail often blocks port 465 from cloud servers, so we use port 587 with STARTTLS
 const emailConfig = {
-  // Use explicit SMTP config instead of 'service' for better reliability
   host: 'smtp.gmail.com',
-  port: 465, // Use 465 for SSL
-  secure: true, // Use SSL
+  port: 587, // Use 587 for STARTTLS (more reliable for cloud servers)
+  secure: false, // Use STARTTLS (upgraded connection)
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   },
   // Connection pool and timeout settings for production
   pool: true, // Use connection pool
-  maxConnections: 5,
+  maxConnections: 3, // Reduced for better stability
   maxMessages: 10,
   rateDelta: 1000, // 1 second between messages
-  rateLimit: 5, // Max 5 messages per rateDelta
-  // Timeout settings (important for production)
-  connectionTimeout: 60000, // 60 seconds
-  greetingTimeout: 30000, // 30 seconds
-  socketTimeout: 60000, // 60 seconds
-  // TLS settings
+  rateLimit: 3, // Max 3 messages per rateDelta
+  // Extended timeout settings for cloud servers
+  connectionTimeout: 90000, // 90 seconds (increased)
+  greetingTimeout: 45000, // 45 seconds (increased)
+  socketTimeout: 90000, // 90 seconds (increased)
+  // TLS settings for STARTTLS
+  requireTLS: true, // Require TLS upgrade
   tls: {
     rejectUnauthorized: false,
-    minVersion: 'TLSv1.2'
+    minVersion: 'TLSv1.2',
+    ciphers: 'SSLv3'
   },
-  // Debug output (only in development)
+  // Debug output
   debug: process.env.NODE_ENV === 'development',
   logger: process.env.NODE_ENV === 'development'
 };
