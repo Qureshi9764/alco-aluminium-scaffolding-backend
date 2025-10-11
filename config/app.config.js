@@ -13,11 +13,56 @@ module.exports = {
 
   // CORS Configuration
   cors: {
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps, Postman, curl)
+      if (!origin) return callback(null, true);
+      
+      const allowedOrigins = [
+        // Local development (Vite default ports)
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'http://localhost:3000',
+        'http://localhost:4173', // Vite preview
+        'http://localhost:4174', // Vite preview
+        'http://127.0.0.1:5173',
+        'http://127.0.0.1:5174',
+        // Production URLs
+        process.env.FRONTEND_URL,
+        // Netlify
+        'https://alcoaaluminiumscaffolding.netlify.app',
+        'https://alcoa-aluminium-scaffolding.netlify.app',
+        // Render
+        'https://alcoa-scaffolding.onrender.com',
+        'https://alco-aluminium-scaffolding.onrender.com',
+        // Vercel
+        'https://alcoa-scaffolding.vercel.app',
+        'https://alco-aluminium-scaffolding.vercel.app'
+      ].filter(Boolean);
+      
+      // Check if origin matches any allowed origin
+      const isAllowed = allowedOrigins.some(allowedOrigin => {
+        if (!allowedOrigin) return false;
+        // Exact match
+        if (origin === allowedOrigin) return true;
+        // Allow all subdomains of Vercel, Render, and Netlify
+        if (origin.endsWith('.vercel.app') || 
+            origin.endsWith('.onrender.com') || 
+            origin.endsWith('.netlify.app')) return true;
+        return false;
+      });
+      
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        console.warn(`CORS blocked origin: ${origin}`);
+        console.warn(`Allowed origins:`, allowedOrigins);
+        callback(new Error(`Not allowed by CORS: ${origin}`));
+      }
+    },
     credentials: true,
     optionsSuccessStatus: 200,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept']
   },
 
   // Rate Limiting Configuration
