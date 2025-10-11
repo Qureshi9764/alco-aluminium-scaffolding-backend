@@ -28,40 +28,67 @@ class EmailService {
   }
 
   /**
-   * Send email helper function
+   * Send email helper function with retry logic
    */
-  async sendEmail(mailOptions) {
-    try {
-      const transporter = this.getTransporter();
-      
-      // Enhanced email options with proper headers
-      const enhancedOptions = {
-        ...mailOptions,
-        from: senderInfo.from,
-        replyTo: mailOptions.replyTo || senderInfo.replyTo,
-        // Add headers to improve deliverability
-        headers: {
-          'X-Priority': '1',
-          'X-MSMail-Priority': 'High',
-          'Importance': 'high',
-          'X-Mailer': 'Alcoa Scaffolding Email Service',
-          ...mailOptions.headers
+  async sendEmail(mailOptions, retries = 3) {
+    let lastError;
+    
+    for (let attempt = 1; attempt <= retries; attempt++) {
+      try {
+        const transporter = this.getTransporter();
+        
+        // Enhanced email options with proper headers
+        const enhancedOptions = {
+          ...mailOptions,
+          from: senderInfo.from,
+          replyTo: mailOptions.replyTo || senderInfo.replyTo,
+          // Add headers to improve deliverability
+          headers: {
+            'X-Priority': '1',
+            'X-MSMail-Priority': 'High',
+            'Importance': 'high',
+            'X-Mailer': 'Alcoa Scaffolding Email Service',
+            ...mailOptions.headers
+          }
+        };
+        
+        logger.info(`Sending email (attempt ${attempt}/${retries})`, {
+          to: mailOptions.to,
+          subject: mailOptions.subject
+        });
+        
+        const info = await transporter.sendMail(enhancedOptions);
+        
+        logger.success('Email sent successfully', {
+          messageId: info.messageId,
+          to: mailOptions.to,
+          subject: mailOptions.subject,
+          attempt: attempt
+        });
+        
+        return info;
+      } catch (error) {
+        lastError = error;
+        logger.warn(`Email send attempt ${attempt}/${retries} failed`, {
+          error: error.message,
+          to: mailOptions.to
+        });
+        
+        // If not the last attempt, wait before retrying
+        if (attempt < retries) {
+          const waitTime = attempt * 2000; // Exponential backoff: 2s, 4s
+          logger.info(`Waiting ${waitTime}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          
+          // Reset transporter for next attempt
+          this.transporter = null;
         }
-      };
-      
-      const info = await transporter.sendMail(enhancedOptions);
-      
-      logger.debug('Email sent', {
-        messageId: info.messageId,
-        to: mailOptions.to,
-        subject: mailOptions.subject
-      });
-      
-      return info;
-    } catch (error) {
-      logger.error('Failed to send email', error);
-      throw error;
+      }
     }
+    
+    // All retries failed
+    logger.error('All email send attempts failed', lastError);
+    throw lastError;
   }
 
   /**
