@@ -14,7 +14,7 @@ const emailConfig = {
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
-  },
+  }, 
   // Connection pool and timeout settings for production
   pool: true, // Use connection pool
   maxConnections: 3, // Reduced for better stability
