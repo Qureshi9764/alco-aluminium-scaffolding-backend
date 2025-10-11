@@ -9,7 +9,7 @@ const nodemailer = require('nodemailer');
 // Gmail often blocks port 465 from cloud servers, so we use port 587 with STARTTLS
 const emailConfig = {
   host: 'smtp.gmail.com',
-  port: 587, // Use 587 for STARTTLS (more reliable for cloud servers)
+  port: 587,  // Use 587 for STARTTLS (more reliable for cloud servers)
   secure: false, // Use STARTTLS (upgraded connection)
   auth: {
     user: process.env.EMAIL_USER,
