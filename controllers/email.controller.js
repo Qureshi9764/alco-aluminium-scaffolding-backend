@@ -33,6 +33,9 @@ class EmailController {
       res.status(200).json(result);
     } catch (error) {
       logger.error('Contact form error', error);
+      // Pass error details to error handler
+      error.statusCode = 500;
+      error.isOperational = true;
       next(error);
     }
   }
@@ -62,6 +65,9 @@ class EmailController {
       res.status(200).json(result);
     } catch (error) {
       logger.error('Quote request error', error);
+      // Pass error details to error handler
+      error.statusCode = 500;
+      error.isOperational = true;
       next(error);
     }
   }

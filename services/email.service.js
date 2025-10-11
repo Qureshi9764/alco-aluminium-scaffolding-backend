@@ -144,7 +144,18 @@ class EmailService {
       };
     } catch (error) {
       logger.emailError('Contact Form', error, { email: data.email });
-      throw new Error('Failed to send contact form email');
+      // Pass the actual error details for better debugging
+      const errorMessage = error.message || 'Failed to send contact form email';
+      const errorDetails = {
+        message: errorMessage,
+        code: error.code,
+        command: error.command,
+        response: error.response,
+        responseCode: error.responseCode
+      };
+      const detailedError = new Error('Failed to send contact form email');
+      detailedError.details = errorDetails;
+      throw detailedError;
     }
   }
 
@@ -202,7 +213,18 @@ class EmailService {
       };
     } catch (error) {
       logger.emailError('Quote Request', error, { email: data.email });
-      throw new Error('Failed to send quote request email');
+      // Pass the actual error details for better debugging
+      const errorMessage = error.message || 'Failed to send quote request email';
+      const errorDetails = {
+        message: errorMessage,
+        code: error.code,
+        command: error.command,
+        response: error.response,
+        responseCode: error.responseCode
+      };
+      const detailedError = new Error('Failed to send quote request email');
+      detailedError.details = errorDetails;
+      throw detailedError;
     }
   }
 

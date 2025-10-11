@@ -51,15 +51,15 @@ const errorHandler = (err, req, res, next) => {
     error.details = 'Unable to connect to email service';
   }
 
-  // Don't leak error details in production
+  // Build response
   const response = {
     success: false,
-    error: error.message
+    error: error.message,
+    details: error.details || null
   };
 
-  // Include details in development mode
+  // Include stack trace in development mode only
   if (config.server.env === 'development') {
-    response.details = error.details;
     response.stack = err.stack;
   }
 
