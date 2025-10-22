@@ -3,7 +3,17 @@
  * Handles HTTP requests for email-related endpoints
  */
 
-const emailService = require('../services/email.service');
+// Force Resend service for production deployment
+let emailService;
+try {
+  const resendService = require('../services/resend.service');
+  emailService = resendService;
+  console.log('✅ Using Resend Email Service');
+} catch (error) {
+  console.error('❌ Failed to load Resend service:', error.message);
+  throw new Error('Resend service is required for deployment');
+}
+
 const { validateContactForm, validateQuoteForm } = require('../validators/email.validator');
 const logger = require('../utils/logger');
 

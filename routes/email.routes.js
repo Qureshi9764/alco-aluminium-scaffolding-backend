@@ -23,11 +23,12 @@ router.post('/send-contact', asyncHandler(emailController.sendContact.bind(email
 router.post('/send-quote', asyncHandler(emailController.sendQuote.bind(emailController)));
 
 /**
- * @route   GET /api/email/test
+ * @route   GET/POST /api/email/test
  * @desc    Test email configuration
  * @access  Development only
  */
 router.get('/test', asyncHandler(emailController.testEmail.bind(emailController)));
+router.post('/test', asyncHandler(emailController.testEmail.bind(emailController)));
 
 module.exports = router;
 
